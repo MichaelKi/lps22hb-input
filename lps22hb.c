@@ -69,6 +69,7 @@
 #include <linux/device.h>
 #include <linux/slab.h>
 #include <linux/kernel.h>
+#include <linux/version.h>
 #include <linux/input/lps22hb.h>
 
 #define	DEBUG
@@ -2027,7 +2028,11 @@ err_exit_check_functionality_failed:
 	return err;
 }
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(3,8,0)
 static int __devexit lps22_prs_remove(struct i2c_client *client)
+#else
+static int lps22_prs_remove(struct i2c_client *client)
+#endif
 {
 	struct lps22_prs_data *prs = i2c_get_clientdata(client);
 
@@ -2080,7 +2085,11 @@ static struct i2c_driver lps22_prs_driver = {
 			.owner = THIS_MODULE,
 	},
 	.probe = lps22_prs_probe,
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(3,8,0)
 	.remove = __devexit_p(lps22_prs_remove),
+#else
+	.remove = (lps22_prs_remove),
+#endif
 	.id_table = lps22_prs_id,
 	.resume = lps22_prs_resume,
 	.suspend = lps22_prs_suspend,
