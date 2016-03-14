@@ -227,7 +227,7 @@ static const struct lps22_prs_platform_data default_lps22_pdata = {
         .min_interval = LPS22_PRS_MIN_POLL_PERIOD_MS,
 };
 
-u8 snsdata[2];
+u8 snsdata[3];
 
 static int lps22_prs_i2c_read(struct lps22_prs_data *prs, u8 *buf, int len)
 {
