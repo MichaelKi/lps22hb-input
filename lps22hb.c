@@ -59,6 +59,7 @@
 
 ******************************************************************************/
 
+#include <linux/module.h>
 #include <linux/err.h>
 #include <linux/errno.h>
 #include <linux/delay.h>
