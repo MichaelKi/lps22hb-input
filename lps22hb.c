@@ -71,6 +71,7 @@
 #include <linux/slab.h>
 #include <linux/kernel.h>
 #include <linux/version.h>
+#include <linux/pm.h>
 #include <linux/input/lps22hb.h>
 
 #define	DEBUG
@@ -136,6 +137,7 @@
 #define	AUTOZ_OFF			 0x00
 #define	AUTORIFP_MASK		 0x80
 #define STOP_ON_FTH_MASK     0x20
+#define SW_RESET_MASK        0x04
 
 /* Barometer and Termometer output data rate ODR */
 #define	ODR_ONESH	0x00	/* one shot both		*/
@@ -422,11 +424,37 @@ static void lps22_prs_device_power_off(struct lps22_prs_data *prs)
 {
 	int err;
 
-    u8 buf[2] = { CTRL_REG1, 0x00 }; //STdbg: was 0x7F
+    u8 buf[5];
 
+    // Power Down
+    buf[0] = CTRL_REG1;
+    buf[1] = 0x00;
 	err = lps22_prs_i2c_write(prs, buf, 1);
 	if (err < 0)
 		dev_err(&prs->client->dev, "soft power off failed: %d\n", err);
+
+    //Sofware Reset
+    buf[0] = CTRL_REG2;
+    buf[1] = SW_RESET_MASK;
+	err = lps22_prs_i2c_write(prs, buf, 1);
+	if (err < 0)
+		dev_err(&prs->client->dev, "soft power off failed: %d\n", err);
+
+    //Give time to exit reset on the device (1us target, 2us upper bound)
+    udelay(2);
+
+    //Restart from consistent status
+    buf[0] = INT_SRC_REG;
+	err = lps22_prs_i2c_read(prs, buf, 1);
+	if (err < 0)
+		dev_err(&prs->client->dev, "status reset 1 failed: %d\n", err);
+
+    //Dummy measurement read for status_reg reset and update blocking due to BDU
+    buf[0] = (I2C_AUTO_INCREMENT | P_REF_INDATA_REG);
+	err = lps22_prs_i2c_read(prs, buf, 5);
+	if (err < 0)
+		dev_err(&prs->client->dev, "status reset 2 failed: %d\n", err);
+
 
 	if (prs->pdata->power_off)
 		prs->pdata->power_off();
@@ -2049,10 +2077,10 @@ static int lps22_prs_remove(struct i2c_client *client)
 	return 0;
 }
 
-#ifdef CONFIG_PM
-
-static int lps22_prs_resume(struct i2c_client *client)
+#ifdef CONFIG_PM_SLEEP
+static int lps22_prs_resume(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct lps22_prs_data *prs = i2c_get_clientdata(client);
 
 	if (prs->on_before_suspend)
@@ -2060,20 +2088,20 @@ static int lps22_prs_resume(struct i2c_client *client)
 	return 0;
 }
 
-static int lps22_prs_suspend(struct i2c_client *client, pm_message_t mesg)
+static int lps22_prs_suspend(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct lps22_prs_data *prs = i2c_get_clientdata(client);
 
 	prs->on_before_suspend = atomic_read(&prs->enabled);
 	return lps22_prs_disable(prs);
 }
 
+static SIMPLE_DEV_PM_OPS(lps22_pm_ops, lps22_prs_suspend, lps22_prs_resume);
+#define LPS22_PM_OPS (&lps22_pm_ops)
 #else
-
-#define lps001wp_prs_resume	    NULL
-#define	lps001wp_prs_suspend	NULL
-
-#endif /* CONFIG_PM */
+#define LPS22_PM_OPS NULL
+#endif
 
 static const struct i2c_device_id lps22_prs_id[]
 		= { { LPS22_PRS_DEV_NAME, 0}, { },};
@@ -2084,6 +2112,7 @@ static struct i2c_driver lps22_prs_driver = {
 	.driver = {
 			.name = LPS22_PRS_DEV_NAME,
 			.owner = THIS_MODULE,
+			.pm = LPS22_PM_OPS,
 	},
 	.probe = lps22_prs_probe,
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(3,8,0)
@@ -2092,8 +2121,6 @@ static struct i2c_driver lps22_prs_driver = {
 	.remove = (lps22_prs_remove),
 #endif
 	.id_table = lps22_prs_id,
-	.resume = lps22_prs_resume,
-	.suspend = lps22_prs_suspend,
 };
 
 static int __init lps22_prs_init(void)
