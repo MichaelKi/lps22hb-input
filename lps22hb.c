@@ -1,33 +1,31 @@
 /*
-* drivers/misc/lps22_prs.c
+* drivers/misc/lps22hb.c
 *
 * STMicroelectronics LPS22HB Pressure / Temperature Sensor module driver
 *
 * Copyright (C) 2015 STMicroelectronics - HESA BU - Application Team
-* (adalberto.muhuho@st.com)
+* Authors: Adalberto Muhuho (adalberto.muhuho@st.com)
 * The structure of this driver is based on reference code previously
 * delivered by Lorenzo Sarchi
 *
+* Version: 0.0.2
+* Date: 2016/Apr/19
+*
+********************************************************************************
+*
 * This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
+* it under the terms of the GNU General Public License version 2 as
+* published by the Free Software Foundation.
 *
-* This program is distributed in the hope that it will be useful, but
-* WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, see <http://www.gnu.org/licenses> or
-* write to the Free Software * Foundation, Inc., 51 Franklin St, Fifth Floor,
-* Boston, MA 02110-1301 USA
-*
+* THE PRESENT SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES
+* OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED, FOR THE SOLE
+* PURPOSE TO SUPPORT YOUR APPLICATION DEVELOPMENT.
 * AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY DIRECT,
 * INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING FROM THE
 * CONTENT OF SUCH SOFTWARE AND/OR THE USE MADE BY CUSTOMERS OF THE CODING
 * INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
 *
+********************************************************************************
 *
 ** Output data from the device are available from the assigned
 * /dev/input/eventX device;
@@ -47,16 +45,14 @@
 * mbar (=0.1 kPa) and Celsius degrees.
 *
 *
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* version 2 as published by the Free Software Foundation.
-*
 */
 /******************************************************************************
  Revision history:
 
  Revision 0.0.1 2015/Dec/11: 1st beta version
 
+ Revision 0.0.2 2016/Apr/19:
+	Revision 0.0.2 downgrades previous License to GPLv2
 ******************************************************************************/
 
 #include <linux/module.h>
