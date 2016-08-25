@@ -173,6 +173,10 @@
 #define	RESUME_ENTRIES		16
 /* end RESUME STATE INDICES */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 0, 0)
+#define	kstrtoul(x, y, z) strict_strtoul(x, y, z)
+#define kstrtol(x, y, z) strict_strtol(x, y, z)
+#endif
 
 u8 decimator_count = 0;
 u8 logout_decimation = 1;
@@ -731,7 +735,7 @@ static ssize_t attr_set_polling_rate(struct device *dev,
 	struct lps22_prs_data *prs = dev_get_drvdata(dev);
 	unsigned long interval_ms;
 
-	if (strict_strtoul(buf, 10, &interval_ms))
+	if (kstrtoul(buf, 10, &interval_ms))
 		return -EINVAL;
 	if (!interval_ms)
 		return -EINVAL;
@@ -764,7 +768,7 @@ static ssize_t attr_set_enable(struct device *dev,
 	pr_info("\n%s Value= \"%s\" \n", LPS22_PRS_DEV_NAME, buf);
 #endif
 
-	if (strict_strtoul(buf, 10, &val))
+	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;
 
 #ifdef DEBUG
@@ -803,7 +807,7 @@ static ssize_t attr_set_press_ref(struct device *dev,
 	struct lps22_prs_data *prs = dev_get_drvdata(dev);
 	long val = 0;
 
-	if (strict_strtol(buf, 10, &val))
+	if (kstrtol(buf, 10, &val))
 		return -EINVAL;
 
 	if (val < PR_ABS_MIN || val > PR_ABS_MAX)
@@ -828,7 +832,7 @@ static ssize_t attr_set_autozero(struct device *dev,
 	static u8 init_val,updated_val;
 	u8 const mask = AUTOZ_MASK;
 
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	if ((val != 0) && (val != 1))
 		goto exit;
@@ -868,7 +872,7 @@ static ssize_t attr_reset_autozero(struct device *dev,
 	static u8 init_val,updated_val;
 	u8 const mask = RESET_AZ_MASK;
 
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	if ((val != 0) && (val != 1))
 		goto exit;
@@ -908,7 +912,7 @@ static ssize_t attr_set_autorifp(struct device *dev,
 	static u8 init_val,updated_val;
 	u8 const mask = AUTORIFP_MASK;
 
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	if ((val != 0) && (val != 1))
 		goto exit;
@@ -949,7 +953,7 @@ static ssize_t attr_reset_autorifp(struct device *dev,
 
 	u8 const mask = RESET_ARP_MASK;
 
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	if ((val != 0) && (val != 1))
 		goto exit;
@@ -988,7 +992,7 @@ static ssize_t attr_set_pthreshold(struct device *dev,
 	struct lps22_prs_data *prs = dev_get_drvdata(dev);
 	unsigned long val;
 
-	if (strict_strtoul(buf, 10, &val))
+	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;
 
 	mutex_lock(&prs->lock);
@@ -1045,7 +1049,7 @@ static ssize_t attr_set_pthreshold_enable(struct device *dev,
 
 	u8 mask = ((u8)(DIFF_EN_MASK | PLE_MASK | PHE_MASK));
 
-	if (strict_strtoul(buf, 10, &val))
+	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;
 
 	if ((val != 0) && (val != 1))
@@ -1115,7 +1119,7 @@ static ssize_t attr_set_watermark_enable(struct device *dev,
 	static u8 init_val,updated_val;
 	u8 const mask = STOP_ON_FTH_MASK;
 
-	if (strict_strtoul(buf, 10, &val))
+	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;
 	if ((val != 0) && (val != 1))
 		goto exit;
@@ -1180,7 +1184,7 @@ static ssize_t attr_set_lc_mode_enable(struct device *dev,
 	static u8 init_val,updated_val;
 	u8 const mask = LC_EN_MASK;
 
-	if (strict_strtoul(buf, 10, &val))
+	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;
 	if ((val != 0) && (val != 1))
 		goto exit;
@@ -1264,7 +1268,7 @@ static ssize_t attr_set_lpf_enable(struct device *dev,
 	static u8 init_val,updated_val;
     u8 const mask = EN_LPFP_MASK;
 
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	if ((val != 0) & (val != 1))
 		goto exit;
@@ -1325,7 +1329,7 @@ static ssize_t attr_set_lpf_cutoff_freq(struct device *dev,
 	static u8 init_val,updated_val;
 	u8 const mask = LPF_CFG_MASK;
 
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	if ((val!=0) && (val!=1))
 		goto exit;
@@ -1444,7 +1448,7 @@ static ssize_t attr_set_fifo(struct device *dev, struct device_attribute *attr,
 #ifdef DEBUG
 	pr_info("\n%s Value= \"%s\" \n", LPS22_PRS_DEV_NAME, buf);
 #endif
-   if (strict_strtoul(buf, 10, &val))
+   if (kstrtoul(buf, 10, &val))
             return -EINVAL;
 
    if ((val != 0) && (val != 1))
@@ -1492,11 +1496,7 @@ static ssize_t attr_fifo_mode(struct device *dev, struct device_attribute *attr,
 	u8 x[2];
 	unsigned long val;
 
-#ifdef DEBUG
-	pr_info("\n%s Valid val: %lu ", LPS22_PRS_DEV_NAME, val);
-#endif
-
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 
 #ifdef DEBUG
@@ -1540,11 +1540,7 @@ static ssize_t attr_set_samples_fifo(struct device *dev, struct device_attribute
 	u8 x[2];
 	unsigned long val;
 
-#ifdef DEBUG
-	pr_info("\n%s Valid val: %lu ", LPS22_PRS_DEV_NAME, val);
-#endif
-
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 
 #ifdef DEBUG
@@ -1588,7 +1584,7 @@ static ssize_t attr_reg_set(struct device *dev, struct device_attribute *attr,
 	u8 x[2];
 	unsigned long val;
 
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	mutex_lock(&prs->lock);
 	x[0] = prs->reg_addr;
@@ -1625,7 +1621,7 @@ static ssize_t attr_addr_set(struct device *dev, struct device_attribute *attr,
 {
 	struct lps22_prs_data *prs = dev_get_drvdata(dev);
 	unsigned long val;
-	if (strict_strtoul(buf, 16, &val))
+	if (kstrtoul(buf, 16, &val))
 		return -EINVAL;
 	mutex_lock(&prs->lock);
 	prs->reg_addr = val;
@@ -1665,7 +1661,7 @@ static ssize_t attr_set_logout_decimation(struct device *dev, struct device_attr
 	struct lps22_prs_data *prs = dev_get_drvdata(dev);
 	unsigned long val;
 
-	if (strict_strtoul(buf, 10, &val))
+	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;
 	mutex_lock(&prs->lock);
     logout_decimation = val;
@@ -1679,7 +1675,7 @@ static ssize_t attr_set_hex_measr_log(struct device *dev, struct device_attribut
 	struct lps22_prs_data *prs = dev_get_drvdata(dev);
 	unsigned long val;
 
-	if (strict_strtoul(buf, 10, &val))
+	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;
     if ((val != 0) && (val!=1))
         goto exit;
@@ -1704,22 +1700,22 @@ static struct device_attribute attributes[] = {
     __ATTR(enable_lpf, 0664, attr_get_lpf_enable, attr_set_lpf_enable),
     __ATTR(lpf_cutoff_freq, 0664, attr_get_lpf_cutoff_freq, attr_set_lpf_cutoff_freq),
 	__ATTR(enable_watermark, 0664, attr_get_watermark_enable, attr_set_watermark_enable),
-    __ATTR(enable_autozero, 0222, NULL, attr_set_autozero),
-    __ATTR(reset_autozero, 0222, NULL, attr_reset_autozero),
-    __ATTR(enable_autorifp, 0222, NULL, attr_set_autorifp),
-    __ATTR(reset_autorifp, 0222, NULL, attr_reset_autorifp),
+    __ATTR(enable_autozero, 0220, NULL, attr_set_autozero),
+    __ATTR(reset_autozero, 0220, NULL, attr_reset_autozero),
+    __ATTR(enable_autorifp, 0220, NULL, attr_set_autorifp),
+    __ATTR(reset_autorifp, 0220, NULL, attr_reset_autorifp),
     __ATTR(fifo_status, 0664, attr_get_fifo_status, NULL),
     __ATTR(status, 0664, attr_get_status, NULL),
 	__ATTR(int_source, 0664, attr_get_interrupt_source, NULL),
-	__ATTR(enable_fifo, 0222, NULL, attr_set_fifo),
-	__ATTR(num_samples_fifo, 0222, NULL, attr_set_samples_fifo),
+	__ATTR(enable_fifo, 0220, NULL, attr_set_fifo),
+	__ATTR(num_samples_fifo, 0220, NULL, attr_set_samples_fifo),
 	__ATTR(fifo_mode, 0664, NULL, attr_fifo_mode),
 #ifdef DEBUG
 	__ATTR(reg_value, 0664, attr_reg_get, attr_reg_set),//DONE
-	__ATTR(reg_addr, 0222, NULL, attr_addr_set),//DONE
+	__ATTR(reg_addr, 0220, NULL, attr_addr_set),//DONE
     __ATTR(reg_dump, 0664, attr_reg_dump, NULL),
-    __ATTR(dmesg_decimation, 0222,NULL,attr_set_logout_decimation),
-    __ATTR(hex_measr_log, 0222,NULL,attr_set_hex_measr_log),
+    __ATTR(dmesg_decimation, 0220,NULL,attr_set_logout_decimation),
+    __ATTR(hex_measr_log, 0220,NULL,attr_set_hex_measr_log),
 #endif
 };
 
